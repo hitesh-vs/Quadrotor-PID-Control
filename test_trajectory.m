@@ -55,6 +55,9 @@ xlabel('x [m]'); ylabel('y [m]'); zlabel('z [m]')
 quadcolors = lines(nquad);
 set(gcf,'Renderer','OpenGL')
 
+global logs;  % Declare logs as global
+logs = struct('time', [], 'roll', [], 'roll_des', [], 'pitch', [], 'pitch_des', [], 'yaw', [], 'yaw_des', []);
+
 %% *********************** INITIAL CONDITIONS ***********************
 fprintf('Setting initial conditions...\n')
 % Maximum time that the quadrotor is allowed to fly
@@ -126,6 +129,8 @@ end
 
 fprintf('Simulation Finished....\n')
 
+disp(logs);
+
 %% ************************* POST PROCESSING *************************
 % Truncate xtraj and ttraj
 for qn = 1:nquad
@@ -139,15 +144,38 @@ if vis
     for qn = 1:nquad
         % Truncate saved variables
         QP{qn}.TruncateHist();
+
         % Plot position for each quad
         h_pos{qn} = figure('Name', ['Quad ' num2str(qn) ' : position']);
         plot_state(h_pos{qn}, QP{qn}.state_hist(1:3,:), QP{qn}.time_hist, 'pos', 'vic');
         plot_state(h_pos{qn}, QP{qn}.state_des_hist(1:3,:), QP{qn}.time_hist, 'pos', 'des');
+
         % Plot velocity for each quad
         h_vel{qn} = figure('Name', ['Quad ' num2str(qn) ' : velocity']);
         plot_state(h_vel{qn}, QP{qn}.state_hist(4:6,:), QP{qn}.time_hist, 'vel', 'vic');
         plot_state(h_vel{qn}, QP{qn}.state_des_hist(4:6,:), QP{qn}.time_hist, 'vel', 'des');
+
+%         % Extract and convert Euler angles from quaternion
+%         euler_angles = zeros(3, 500); % Preallocate for roll, pitch, yaw
+%         for i = 1:500
+%             Rot = QuatToRot(QP{qn}.state_hist(7:10, i)');  % Get rotation matrix from quaternion
+%             [phi, theta, yaw] = RotToRPY_ZXY(Rot);  % Convert to roll, pitch, yaw
+%             euler_angles(:, i) = [phi; theta; yaw];  % Store the angles
+%         end
+% 
+%         % Plot orientation for each quad
+%         h_orient{qn} = figure('Name', ['Quad ' num2str(qn) ' : orientation']);
+%         plot(QP{qn}.time_hist, euler_angles(1,:), 'r', 'DisplayName', 'Roll'); hold on; % Roll
+%         plot(QP{qn}.time_hist, euler_angles(2,:), 'g', 'DisplayName', 'Pitch'); % Pitch
+%         plot(QP{qn}.time_hist, euler_angles(3,:), 'b', 'DisplayName', 'Yaw'); % Yaw
+%         xlabel('Time (s)');
+%         ylabel('Orientation (rad)');
+%         title(['Quad ' num2str(qn) ' Orientation']);
+%         legend show; % Show legend
+%         grid on; % Add grid
+%         hold off;
     end
 end
+
 
 end

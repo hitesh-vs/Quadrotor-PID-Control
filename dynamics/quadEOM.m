@@ -18,6 +18,8 @@ function sdot = quadEOM(t, s, qn, controlhandle, trajhandle, params)
 % NOTE: You should not modify this function
 % See Also: quadEOM_readonly, crazyflie
 
+global logs;
+
 % convert state to quad stuct for control
 qd{qn} = stateToQd(s);
 
@@ -33,7 +35,16 @@ qd{qn}.yaw_des      = desired_state.yaw;
 qd{qn}.yawdot_des   = desired_state.yawdot;
 
 % get control outputs
-[F, M, trpy, drpy] = controlhandle(qd, t, qn, params);
+[F, M, trpy, drpy, log_data] = controlhandle(qd, t, qn, params);
+
+ % Update global logs
+    logs.time = [logs.time, t];
+    logs.roll = [logs.roll, log_data.roll];
+    logs.roll_des = [logs.roll_des, log_data.roll_des];
+    logs.pitch = [logs.pitch, log_data.pitch];
+    logs.pitch_des = [logs.pitch_des, log_data.pitch_des];
+    logs.yaw = [logs.yaw, log_data.yaw];
+    logs.yaw_des = [logs.yaw_des, log_data.yaw_des];
 
 % compute derivative
 sdot = quadEOM_readonly(t, s, F, M, params);
