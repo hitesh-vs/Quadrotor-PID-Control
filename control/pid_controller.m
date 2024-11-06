@@ -1,4 +1,4 @@
-function [F, M, trpy, drpy, logs] = pid_controller(qd, t, qn, params)
+function [F, M, trpy, drpy] = pid_controller(qd, t, qn, params)
 % CONTROLLER quadrotor controller
 % The current states are:
 % qd{qn}.pos, qd{qn}.vel, qd{qn}.euler = [roll;pitch;yaw], qd{qn}.omega
@@ -8,20 +8,28 @@ function [F, M, trpy, drpy, logs] = pid_controller(qd, t, qn, params)
 
 % =================== Your code goes here ===================
 
+% persistent gd;
+% persistent icnt;
+% global time_log roll_log roll_des_log pitch_log pitch_des_log yaw_log yaw_des_log;
+%  if isempty(gd)
+%      gd = zeros(0,3);
+%      icnt = 0;
+%      % Initialize logs
+%      time_log = [];
+%      roll_log = [];
+%      roll_des_log = [];
+%      pitch_log = [];
+%      pitch_des_log = [];
+%      yaw_log = [];
+%      yaw_des_log = [];
+%  end
+%  icnt = icnt + 1;
+
 persistent gd;
 persistent icnt;
-global time_log roll_log roll_des_log pitch_log pitch_des_log yaw_log yaw_des_log;
  if isempty(gd)
      gd = zeros(0,3);
      icnt = 0;
-     % Initialize logs
-     time_log = [];
-     roll_log = [];
-     roll_des_log = [];
-     pitch_log = [];
-     pitch_des_log = [];
-     yaw_log = [];
-     yaw_des_log = [];
  end
  icnt = icnt + 1;
  
@@ -59,8 +67,8 @@ g = params.grav;
 %Controller Gains
 kdz = 22;
 kpz = 18.5;
-kpx = 5;
-kdx = 7;
+kpx = 6.19;
+kdx = 6.9;
 kpy = 9;
 kdy = 7;
 kproll = 1000;
@@ -68,23 +76,23 @@ kppitch = 1000;
 kpyaw = 300;
 kdroll = 80;
 kdpitch = 80;
-kdyaw = 62.5;
+kdyaw = 60;
 
 % errors 
 e_p = r_des - r;
 e_v = rdot_des - rdot;
 
 %Tracking 
-global 	T_pre count P_MSE_list V_MSE_list  P_RMS V_RMS
-P_RMS = P_RMS + e_p'*e_p;
-V_RMS = V_RMS + e_v'*e_v;
-P_MSE_list = [P_MSE_list;e_p'*e_p];
-V_MSE_list = [V_MSE_list; e_v'*e_v];
-disp("Postion_MSE: "+num2str( e_p'*e_p));
-disp("Velocity_MSE: "+num2str(e_v'*e_v));
-dt = t - T_pre;
-T_pre = t;
-count = count + 1;
+% global 	T_pre count P_MSE_list V_MSE_list  P_RMS V_RMS
+% P_RMS = P_RMS + e_p'*e_p;
+% V_RMS = V_RMS + e_v'*e_v;
+% P_MSE_list = [P_MSE_list;e_p'*e_p];
+% V_MSE_list = [V_MSE_list; e_v'*e_v];
+% disp("Postion_MSE: "+num2str( e_p'*e_p));
+% disp("Velocity_MSE: "+num2str(e_v'*e_v));
+% dt = t - T_pre;
+% T_pre = t;
+% count = count + 1;
 
 %Position controller
 rddot(1) = rddot_des(1) + kpx*(e_p(1)) + kdx*(e_v(1));
@@ -134,19 +142,19 @@ M = I*Matrix;
 % M = I*Matrix;
 
 % Log the data for plotting
-time_log = [time_log, t];
-roll_log = [roll_log, roll];
-roll_des_log = [roll_des_log, roll_des];
-pitch_log = [pitch_log, pitch];
-pitch_des_log = [pitch_des_log, pitch_des];
-yaw_log = [yaw_log, yaw];
-yaw_des_log = [yaw_des_log, yaw_des];
+% time_log = [time_log, t];
+% roll_log = [roll_log, roll];
+% roll_des_log = [roll_des_log, roll_des];
+% pitch_log = [pitch_log, pitch];
+% pitch_des_log = [pitch_des_log, pitch_des];
+% yaw_log = [yaw_log, yaw];
+% yaw_des_log = [yaw_des_log, yaw_des];
 
 % Store all logs in a single structure for output
-logs = struct('time', time_log, ...
-              'roll', roll_log, 'roll_des', roll_des_log, ...
-              'pitch', pitch_log, 'pitch_des', pitch_des_log, ...
-              'yaw', yaw_log, 'yaw_des', yaw_des_log);
+% logs = struct('time', time_log, ...
+%               'roll', roll_log, 'roll_des', roll_des_log, ...
+%               'pitch', pitch_log, 'pitch_des', pitch_des_log, ...
+%               'yaw', yaw_log, 'yaw_des', yaw_des_log);
 
 % =================== Your code ends here ===================
 

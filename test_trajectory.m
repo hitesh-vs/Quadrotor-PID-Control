@@ -129,7 +129,7 @@ end
 
 fprintf('Simulation Finished....\n')
 
-disp(logs);
+%disp(logs);
 
 %% ************************* POST PROCESSING *************************
 % Truncate xtraj and ttraj
